@@ -13,8 +13,12 @@ export class PostsService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
+  async getUserPosts(userId: String) {
+    return this.postModel.find({ userId: userId }).exec();
+  }
+
   async findNewest(): Promise<Posts[]> {
-    return this.postModel.find();
+    return this.postModel.aggregate([{ $sort: { create_at: -1 } }]);
   }
 
   async increaseFavorite(id: string) {
@@ -45,12 +49,53 @@ export class PostsService {
     let user = await this.userModel.findOne({ _id: post.userId });
     let res = { ...post._doc, user: user };
     return res;
+    // return this.postModel.aggregate([
+    //   { $project: { title: 1, userId: { $toObjectId: '$userId' } } },
+    //   {
+    //     $lookup: {
+    //       from: 'users',
+    //       localField: 'userId',
+    //       foreignField: '_id',
+    //       pipeline: [{ $project: { username: 1 } }],
+    //       as: 'userInfo',
+    //     },
+    //   },
+    // ]);
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto) {
-    return this.postModel
-      .updateOne({ _id: id }, { $set: { ...updatePostDto } })
-      .exec();
+  async update(id: string, req) {
+    try {
+      // console.log(id);
+      // console.log(req.body);
+      return this.postModel.updateOne(
+        { _id: id },
+        {
+          $set: {
+            title: req.body.title,
+            description: req.body.description,
+            category: req.body.category,
+          },
+        },
+      );
+
+      // if (updatePostDto.byUserId === updatePostDto.userId) {
+      //   return this.postModel
+      //     .updateOne(
+      //       { _id: id },
+      //       {
+      //         $set: {
+      //           title: updatePostDto.title,
+      //           description: updatePostDto.description,
+      //           category: updatePostDto.category,
+      //         },
+      //       },
+      //     )
+      //     .exec();
+      // }
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   }
 
   async remove(id: string) {

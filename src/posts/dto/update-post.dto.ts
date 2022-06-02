@@ -5,7 +5,6 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {
   title: string;
   description: string;
   category: string;
-  imageUrl: string;
-  favoriteAmount: number;
-  userId?: string;
+  userId: string;
+  byUserId: string;
 }
