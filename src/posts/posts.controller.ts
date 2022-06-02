@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Request,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -20,6 +21,14 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly userService: UserService,
   ) {}
+
+  @Get()
+  async getUserPosts(@Query('userId') userId: string) {
+    if (!userId) {
+      return this.postsService.findAll();
+    }
+    return this.postsService.getUserPosts(userId);
+  }
 
   @Get('newest')
   findNewest() {
@@ -45,17 +54,13 @@ export class PostsController {
   @Get(':id')
   findOne(@Param('id') id: string): any {
     let post = this.postsService.findOne(id);
-    // let user = this.userService.findOneById(post.userId);
-    // console.log(post);
-    // console.log(user);
-    // let response = { ...post, ...user } as any;
-    // console.log(response);
+
     return post;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(id, updatePostDto);
+  update(@Param('id') id: string, @Request() req) {
+    return this.postsService.update(id, req);
   }
 
   @Delete(':id')

@@ -42,7 +42,7 @@ export class AuthController {
     return this.authService.create(createAuthDto);
   }
 
-  @Get('logout')
+  @Post('logout')
   async logout(@Request() req, @Response({ passthrough: true }) res) {
     try {
       await req.session?.destroy();
